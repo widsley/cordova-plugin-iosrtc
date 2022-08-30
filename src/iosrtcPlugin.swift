@@ -379,7 +379,11 @@ class iosrtcPlugin : CDVPlugin {
 		}
 
 		self.queue.async { [weak pluginRTCPeerConnection, weak pluginMediaStreamTrack] in
-			let pluginRTCRtpSender = pluginRTCPeerConnection?.addTrack(pluginMediaStreamTrack!, pluginRTCRtpTransceiverId, pluginRTCRtpReceiverId, pluginRTCRtpSenderId, streamIds)
+            guard let pluginRTCPeerConnection = pluginRTCPeerConnection,
+                  let pluginMediaStreamTrack = pluginMediaStreamTrack else {
+                return
+            }
+			let pluginRTCRtpSender = pluginRTCPeerConnection.addTrack(pluginMediaStreamTrack, pluginRTCRtpTransceiverId, pluginRTCRtpReceiverId, pluginRTCRtpSenderId, streamIds)
 			self.emit(command.callbackId,
 				result: CDVPluginResult(
 					status: CDVCommandStatus_OK,
@@ -794,9 +798,14 @@ class iosrtcPlugin : CDVPlugin {
 		}
 
 
-		self.queue.async { [weak pluginRTCPeerConnection] in
-			pluginRTCPeerConnection?.createDTMFSender(dsId,
-				track: pluginMediaStreamTrack!,
+		self.queue.async { [weak self, weak pluginRTCPeerConnection, weak pluginMediaStreamTrack] in
+            guard let self = self,
+                  let pluginRTCPeerConnection = pluginRTCPeerConnection,
+                  let pluginMediaStreamTrack = pluginMediaStreamTrack else {
+                return
+            }
+			pluginRTCPeerConnection.createDTMFSender(dsId,
+				track: pluginMediaStreamTrack,
 				eventListener: { (data: NSDictionary) -> Void in
 					let result = CDVPluginResult(
 						status: CDVCommandStatus_OK,
@@ -900,7 +909,11 @@ class iosrtcPlugin : CDVPlugin {
 		}
 
 		self.queue.async { [weak pluginMediaStream, weak pluginMediaStreamTrack] in
-			pluginMediaStream?.addTrack(pluginMediaStreamTrack!)
+            guard let pluginMediaStream = pluginMediaStream,
+                  let pluginMediaStreamTrack = pluginMediaStreamTrack else {
+                return
+            }
+			pluginMediaStream.addTrack(pluginMediaStreamTrack)
 		}
 	}
 
@@ -923,7 +936,11 @@ class iosrtcPlugin : CDVPlugin {
 		}
 
 		self.queue.async { [weak pluginMediaStream, weak pluginMediaStreamTrack] in
-			pluginMediaStream?.removeTrack(pluginMediaStreamTrack!)
+            guard let pluginMediaStream = pluginMediaStream,
+                  let pluginMediaStreamTrack = pluginMediaStreamTrack else {
+                return
+            }
+			pluginMediaStream.removeTrack(pluginMediaStreamTrack)
 
 			// TODO only stop if no more pluginMediaStream attached only
 			// currently pluginMediaStreamTrack can be attached to more than one pluginMediaStream
@@ -996,8 +1013,11 @@ class iosrtcPlugin : CDVPlugin {
 		}
 
 		self.queue.async { [weak pluginMediaStreamTrack] in
+            guard let pluginMediaStreamTrack = pluginMediaStreamTrack else {
+                return
+            }
 			// Set the eventListener.
-			pluginMediaStreamTrack?.setListener(
+			pluginMediaStreamTrack.setListener(
 				{ (data: NSDictionary) -> Void in
 					let result = CDVPluginResult(
 						status: CDVCommandStatus_OK,
@@ -1010,7 +1030,7 @@ class iosrtcPlugin : CDVPlugin {
 				},
 				eventListenerForEnded: { () -> Void in
 					// Remove the track from the container.
-					self.deleteMediaStreamTrack(pluginMediaStreamTrack!);
+					self.deleteMediaStreamTrack(pluginMediaStreamTrack);
 				}
 			)
 		}
