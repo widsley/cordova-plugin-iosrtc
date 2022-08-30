@@ -798,9 +798,8 @@ class iosrtcPlugin : CDVPlugin {
 		}
 
 
-		self.queue.async { [weak self, weak pluginRTCPeerConnection, weak pluginMediaStreamTrack] in
-            guard let self = self,
-                  let pluginRTCPeerConnection = pluginRTCPeerConnection,
+		self.queue.async { [weak pluginRTCPeerConnection, weak pluginMediaStreamTrack] in
+            guard let pluginRTCPeerConnection = pluginRTCPeerConnection,
                   let pluginMediaStreamTrack = pluginMediaStreamTrack else {
                 return
             }
